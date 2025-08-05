@@ -6,127 +6,186 @@
   <title>工具貸し出し管理システム</title>
   <style>
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      font-family: Arial, sans-serif; 
       margin: 0; padding: 20px; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+      background: #f5f5f5;
+      line-height: 1.6;
     }
     .container {
-      max-width: 1200px; margin: 0 auto; 
-      background: white; border-radius: 10px; 
-      padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-width: 1200px; 
+      margin: 0 auto; 
+      background: white; 
+      border-radius: 8px; 
+      padding: 30px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    h1 { color: #333; text-align: center; margin-bottom: 30px; }
-    h3 { color: #555; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+    h1 { 
+      color: #333; 
+      text-align: center; 
+      margin-bottom: 30px; 
+      border-bottom: 3px solid #007bff;
+      padding-bottom: 10px;
+    }
+    h3 { 
+      color: #555; 
+      border-bottom: 2px solid #ddd; 
+      padding-bottom: 8px; 
+      margin-top: 30px;
+    }
     
     .csv-section {
-      background: #f8f9fa; padding: 20px; border-radius: 8px; 
-      margin-bottom: 30px; border-left: 4px solid #28a745;
+      background: #f8f9fa; 
+      padding: 20px; 
+      border-radius: 5px; 
+      margin-bottom: 25px; 
+      border: 1px solid #ddd;
     }
     .csv-section input[type="file"] { 
-      padding: 10px; margin: 10px 0; 
-      border: 2px dashed #28a745; border-radius: 4px; 
-      background: white; width: 100%; font-size: 16px;
+      padding: 8px; 
+      margin: 10px 10px 10px 0; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      background: white; 
+      width: 300px;
     }
-    
-    /* 通知スタイル */
-    .notification {
-      position: fixed; top: 20px; right: 20px; z-index: 10000;
-      padding: 15px 20px; border-radius: 8px; color: white;
-      font-weight: bold; opacity: 0; transform: translateX(100%);
-      transition: all 0.3s ease;
-      max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    .csv-section button {
+      background: #007bff; 
+      color: white; 
+      padding: 10px 20px;
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
     }
-    .notification.show { opacity: 1; transform: translateX(0); }
-    .notification.success { background: linear-gradient(135deg, #28a745, #20c997); }
-    .notification.error { background: linear-gradient(135deg, #dc3545, #e74c3c); }
-    .notification.info { background: linear-gradient(135deg, #17a2b8, #007bff); }
-    
-    /* デバッグコンソール */
-    .debug-console {
-      background: #1a1a1a; color: #00ff00; font-family: 'Courier New', monospace;
-      border-radius: 8px; padding: 15px; margin: 20px 0;
-      height: 200px; overflow-y: auto; font-size: 12px;
-      border: 2px solid #333;
+    .csv-section button:hover { 
+      background: #0056b3; 
     }
-    .debug-console .timestamp { color: #888; }
-    .debug-console .success { color: #28a745; }
-    .debug-console .error { color: #dc3545; }
-    .debug-console .info { color: #17a2b8; }
-    .debug-console .warning { color: #ffc107; }
+    .csv-section button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
     
     table { 
-      width: 100%; border-collapse: collapse; margin-bottom: 30px;
-      background: white; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-bottom: 25px;
+      border: 1px solid #ddd;
     }
     th, td { 
-      border: 1px solid #e2e8f0; padding: 12px; text-align: center; 
+      border: 1px solid #ddd; 
+      padding: 12px; 
+      text-align: center; 
     }
     th { 
-      background: linear-gradient(135deg, #667eea, #764ba2); 
-      color: white; font-weight: bold;
+      background: #f8f9fa; 
+      font-weight: bold;
+      color: #495057;
     }
-    tr:nth-child(even) { background: #f8f9fa; }
-    tr:hover { background: #e2e8f0; }
+    tr:nth-child(even) { 
+      background: #f8f9fa; 
+    }
+    tr:hover { 
+      background: #e9ecef; 
+    }
     
     img.icon { 
-      width: 40px; height: 40px; object-fit: contain;
-      border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 40px; 
+      height: 40px; 
+      object-fit: contain;
+      border-radius: 3px;
     }
     
     .tool-actions button { 
-      margin: 2px; padding: 8px 16px;
-      border: none; border-radius: 4px; cursor: pointer;
-      font-weight: bold; transition: all 0.3s;
+      margin: 2px; 
+      padding: 6px 12px;
+      border: none; 
+      border-radius: 3px; 
+      cursor: pointer;
+      font-size: 12px;
     }
-    .btn-borrow { background: #48bb78; color: white; }
-    .btn-borrow:hover { background: #38a169; }
-    .btn-return { background: #ed8936; color: white; }
-    .btn-return:hover { background: #dd6b20; }
+    .btn-borrow { 
+      background: #28a745; 
+      color: white; 
+    }
+    .btn-borrow:hover { 
+      background: #218838; 
+    }
+    .btn-return { 
+      background: #ffc107; 
+      color: #212529; 
+    }
+    .btn-return:hover { 
+      background: #e0a800; 
+    }
     
     .modal {
-      display: none; position: fixed; z-index: 9999; 
-      left: 0; top: 0; width: 100vw; height: 100vh; 
-      background: rgba(0,0,0,0.5);
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.4);
     }
     .modal-inner {
-      background: white; border-radius: 10px; 
-      max-width: 400px; margin: 10% auto; 
-      padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      background: white; 
+      border-radius: 5px; 
+      max-width: 400px; 
+      margin: 15% auto; 
+      padding: 20px; 
       position: relative;
+      border: 1px solid #ddd;
     }
     .close-btn {
-      position: absolute; top: 10px; right: 15px; 
-      cursor: pointer; font-size: 24px; color: #999;
+      position: absolute; 
+      top: 10px; 
+      right: 15px; 
+      cursor: pointer; 
+      font-size: 20px; 
+      color: #aaa;
     }
-    .close-btn:hover { color: #333; }
+    .close-btn:hover { 
+      color: #000; 
+    }
     
     .modal form label {
-      display: block; margin: 15px 0 5px 0; 
-      font-weight: bold; color: #333;
+      display: block; 
+      margin: 10px 0 5px 0; 
+      font-weight: bold;
     }
     .modal form select, .modal form input {
-      width: 100%; padding: 10px; border: 1px solid #ddd; 
-      border-radius: 4px; font-size: 16px;
+      width: 100%; 
+      padding: 8px; 
+      border: 1px solid #ccc; 
+      border-radius: 3px;
+      box-sizing: border-box;
     }
     .modal form button {
-      width: 100%; background: #667eea; color: white; 
-      padding: 12px; border: none; border-radius: 4px; 
-      font-size: 16px; font-weight: bold; cursor: pointer;
-      margin-top: 20px;
+      width: 100%; 
+      background: #007bff; 
+      color: white; 
+      padding: 10px; 
+      border: none; 
+      border-radius: 3px; 
+      cursor: pointer;
+      margin-top: 15px;
+      font-size: 14px;
     }
-    .modal form button:hover { background: #5a67d8; }
-    
-    .control-buttons {
-      margin: 10px 0;
+    .modal form button:hover { 
+      background: #0056b3; 
     }
-    .control-buttons button {
-      background: #6c757d; color: white; border: none;
-      padding: 8px 16px; border-radius: 4px; margin-right: 10px;
-      cursor: pointer; font-weight: bold;
+
+    .no-data {
+      color: #6c757d; 
+      font-style: italic; 
+      text-align: center;
+      padding: 20px;
     }
-    .control-buttons button:hover { background: #545b62; }
+
+    .stock-low { color: #dc3545; font-weight: bold; }
+    .stock-ok { color: #28a745; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -137,18 +196,10 @@
       <h4>📁 工具マスタCSVファイル読み込み</h4>
       <p><strong>CSVフォーマット:</strong> 工具名,本数,画像ファイル名</p>
       <input type="file" id="csvInput" accept=".csv">
+      <button id="loadCsvBtn" onclick="loadSelectedCSV()" disabled>読み込み</button>
       <p style="font-size: 14px; color: #666; margin-top: 10px;">
         例: ドライバー,10,driver.png
       </p>
-    </div>
-
-    <h3>🖥️ デバッグコンソール</h3>
-    <div class="control-buttons">
-      <button onclick="clearDebugLog()">ログクリア</button>
-      <button onclick="exportDebugLog()">ログエクスポート</button>
-    </div>
-    <div class="debug-console" id="debugConsole">
-      <div class="info">[システム] デバッグコンソールを開始しました</div>
     </div>
 
     <h3>📋 工具一覧</h3>
@@ -163,7 +214,7 @@
       </thead>
       <tbody>
         <tr>
-          <td colspan="4" style="color: #666; font-style: italic;">
+          <td colspan="4" class="no-data">
             CSVファイルを読み込んでください
           </td>
         </tr>
@@ -172,7 +223,7 @@
 
     <h3>📊 貸し出し状況一覧</h3>
     <div id="statusDiv">
-      <p style="text-align:center; color:#666;">CSVファイルを読み込んでください</p>
+      <p class="no-data">CSVファイルを読み込んでください</p>
     </div>
 
     <h3>📜 貸出・返却 履歴</h3>
@@ -188,16 +239,13 @@
       </thead>
       <tbody>
         <tr>
-          <td colspan="5" style="color: #666; font-style: italic;">
+          <td colspan="5" class="no-data">
             履歴はありません
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-
-  <!-- 通知エリア -->
-  <div id="notificationArea"></div>
 
   <!-- モーダル -->
   <div class="modal" id="modal">
@@ -209,112 +257,128 @@
 
   <script>
     // プリセットのクラス名一覧
-    const CLASS_LIST = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    const CLASS_LIST = ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C"];
 
     // グローバル変数
     let tools = [];
     let borrowStatus = {}; // {tool名: {class名:本数, ...}, ...}
     let toolStock = {}; // {tool名: 在庫数}
     let history = [];
+    let selectedFile = null;
     
     // localStorageキー
     const STORAGE_KEY = "toolsystem-data-v2";
 
-    // デバッグログ機能
+    // デバッグログ（コンソールのみ）
     function debugLog(message, type = 'info') {
-      const console = document.getElementById('debugConsole');
       const timestamp = new Date().toLocaleString('ja-JP');
-      const logEntry = document.createElement('div');
-      logEntry.className = type;
-      logEntry.innerHTML = `<span class="timestamp">[$$e3RpbWVzdGFtcH1dPC9zcGFuPiA=$${message}`;
-      console.appendChild(logEntry);
-      console.scrollTop = console.scrollHeight;
+      const logMessage = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
       
-      // コンソールにも出力
-      console.log(`[${type.toUpperCase()}] ${message}`);
+      switch(type) {
+        case 'error':
+          console.error(logMessage);
+          break;
+        case 'warning':
+          console.warn(logMessage);
+          break;
+        case 'success':
+          console.log(`%c${logMessage}`, 'color: green');
+          break;
+        default:
+          console.log(logMessage);
+      }
     }
 
-    function clearDebugLog() {
-      document.getElementById('debugConsole').innerHTML = 
-        '<div class="info">[システム] ログをクリアしました</div>';
-      debugLog('デバッグログをクリアしました', 'info');
-    }
-
-    function exportDebugLog() {
-      const console = document.getElementById('debugConsole');
-      const logs = console.innerText;
-      const blob = new Blob([logs], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `debug_log_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      debugLog('デバッグログをエクスポートしました', 'info');
-    }
-
-    // 通知機能
-    function showNotification(message, type = 'info', duration = 3000) {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.textContent = message;
-      
-      document.getElementById('notificationArea').appendChild(notification);
-      
-      // アニメーション表示
-      setTimeout(() => notification.classList.add('show'), 100);
-      
-      // 自動削除
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-      }, duration);
-      
-      debugLog(`通知表示: ${message}`, type);
-    }
-
-    // CSVファイル読み込み
+    // ファイル選択時の処理
     document.getElementById('csvInput').addEventListener('change', function(e) {
+      debugLog('ファイル選択イベントが発生しました');
+      
       const file = e.target.files[0];
+      const loadBtn = document.getElementById('loadCsvBtn');
+      
       if (!file) {
         debugLog('ファイルが選択されていません', 'warning');
+        selectedFile = null;
+        loadBtn.disabled = true;
         return;
       }
       
-      debugLog(`CSVファイル読み込み開始: ${file.name} (${file.size} bytes)`, 'info');
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        debugLog('CSVファイル以外が選択されました', 'warning');
+        alert('CSVファイルを選択してください');
+        e.target.value = '';
+        selectedFile = null;
+        loadBtn.disabled = true;
+        return;
+      }
+      
+      selectedFile = file;
+      loadBtn.disabled = false;
+      debugLog(`CSVファイル選択完了: ${file.name} (${file.size} bytes)`);
+    });
+
+    // CSV読み込みボタンの処理
+    function loadSelectedCSV() {
+      if (!selectedFile) {
+        debugLog('読み込み対象のファイルがありません', 'error');
+        return;
+      }
+      
+      debugLog(`CSVファイル読み込み開始: ${selectedFile.name}`);
       
       const reader = new FileReader();
+      
+      reader.onloadstart = function() {
+        debugLog('ファイル読み込み処理開始');
+        document.getElementById('loadCsvBtn').disabled = true;
+        document.getElementById('loadCsvBtn').textContent = '読み込み中...';
+      };
+      
       reader.onload = function(evt) {
         const text = evt.target.result;
         debugLog(`ファイル読み込み完了: ${text.length} 文字`, 'success');
         parseAndLoadCSV(text);
+        
+        document.getElementById('loadCsvBtn').disabled = false;
+        document.getElementById('loadCsvBtn').textContent = '読み込み';
       };
-      reader.onerror = function() {
-        debugLog('ファイル読み込みエラーが発生しました', 'error');
-        showNotification('ファイル読み込みに失敗しました', 'error');
+      
+      reader.onerror = function(error) {
+        debugLog(`ファイル読み込みエラー: ${error}`, 'error');
+        alert('ファイル読み込みに失敗しました');
+        
+        document.getElementById('loadCsvBtn').disabled = false;
+        document.getElementById('loadCsvBtn').textContent = '読み込み';
       };
-      reader.readAsText(file, "UTF-8");
-    });
+      
+      reader.readAsText(selectedFile, "UTF-8");
+    }
 
     // CSV解析
     function parseAndLoadCSV(csv) {
       try {
-        debugLog('CSV解析を開始しています...', 'info');
+        debugLog('CSV解析を開始');
         
         const lines = csv.trim().split(/\r?\n/);
-        debugLog(`CSVファイル: ${lines.length} 行検出`, 'info');
+        debugLog(`CSVファイル: ${lines.length} 行検出`);
         
         if (lines.length < 2) {
           throw new Error('CSVファイルにデータが不足しています（ヘッダー + データ行が必要）');
         }
         
         const header = lines[0].replace(/\s/g, '').split(',');
-        debugLog(`ヘッダー: ${header.join(', ')}`, 'info');
+        debugLog(`ヘッダー: ${header.join(', ')}`);
         
-        const KNAME = '工具名', KSTOCK = '本数', KIMG = '画像';
-        const nameIndex = header.findIndex(h => h.includes('工具') || h.includes('名前') || h === 'name');
-        const stockIndex = header.findIndex(h => h.includes('本数') || h.includes('数量') || h === 'stock');
-        const imgIndex = header.findIndex(h => h.includes('画像') || h.includes('ファイル') || h === 'image');
+        // 柔軟なヘッダー検索
+        const nameIndex = header.findIndex(h => 
+          h.includes('工具') || h.includes('名前') || h.includes('name') || h === 'tool'
+        );
+        const stockIndex = header.findIndex(h => 
+          h.includes('本数') || h.includes('数量') || h.includes('stock') || h.includes('count')
+        );
+        const imgIndex = header.findIndex(h => 
+          h.includes('画像') || h.includes('ファイル') || h.includes('image') || h.includes('img')
+        );
         
         if (nameIndex === -1) {
           throw new Error('工具名の列が見つかりません');
@@ -322,6 +386,8 @@
         if (stockIndex === -1) {
           throw new Error('本数の列が見つかりません');
         }
+        
+        debugLog(`列インデックス - 工具名: ${nameIndex}, 本数: ${stockIndex}, 画像: ${imgIndex}`);
         
         tools = [];
         borrowStatus = {};
@@ -335,7 +401,7 @@
             const row = lines[i].split(',');
             const toolname = row[nameIndex]?.trim();
             const stock = parseInt(row[stockIndex]?.trim() || "0", 10);
-            const img = row[imgIndex]?.trim() || '';
+            const img = imgIndex >= 0 ? (row[imgIndex]?.trim() || '') : '';
             
             if (!toolname) {
               debugLog(`行 ${i + 1}: 工具名が空です - スキップ`, 'warning');
@@ -346,12 +412,13 @@
               debugLog(`行 ${i + 1}: 本数が無効です (${row[stockIndex]}) - 0に設定`, 'warning');
             }
             
-            tools.push({ name: toolname, stock: Math.max(stock, 0), img: img });
+            const finalStock = Math.max(stock, 0);
+            tools.push({ name: toolname, stock: finalStock, img:img });
             borrowStatus[toolname] = {};
-            toolStock[toolname] = Math.max(stock, 0);
+            toolStock[toolname] = finalStock;
             successCount++;
             
-            debugLog(`工具追加: ${toolname} (在庫: ${Math.max(stock, 0)}, 画像: ${img || 'なし'})`, 'success');
+            debugLog(`工具追加: ${toolname} (在庫: ${finalStock}, 画像: ${img || 'なし'})`, 'success');
             
           } catch (error) {
             errorCount++;
@@ -370,26 +437,26 @@
         renderHistory();
         
         // 完了通知
-        showNotification(`CSV読み込み完了！${successCount}個の工具を登録しました`, 'success', 4000);
+        alert(`CSV読み込み完了！${successCount}個の工具を登録しました`);
         
         if (errorCount > 0) {
-          showNotification(`${errorCount}件のエラーがありました。詳細はデバッグコンソールを確認してください`, 'warning', 5000);
+          alert(`${errorCount}件のエラーがありました。詳細はブラウザのコンソールを確認してください`);
         }
         
       } catch (error) {
         debugLog(`CSV解析エラー: ${error.message}`, 'error');
-        showNotification(`CSV読み込みエラー: ${error.message}`, 'error', 5000);
+        alert(`CSV読み込みエラー: ${error.message}`);
       }
     }
 
     // 工具リスト描画
     function renderTools() {
-      debugLog('工具リストを描画中...', 'info');
+      debugLog('工具リストを描画中');
       const tbody = document.querySelector('#toolTable tbody');
       tbody.innerHTML = "";
       
       if (tools.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color: #666; font-style: italic;">工具が登録されていません</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="no-data">工具が登録されていません</td></tr>';
         return;
       }
       
@@ -400,15 +467,17 @@
         const imgTd = document.createElement('td');
         if (tool.img) {
           imgTd.innerHTML = `<img class="icon" src="tools/${tool.img}" alt="${tool.name}" 
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div style="width:40px; height:40px; background:#f3f4f6; display:none; align-items:center; justify-content:center; border-radius:4px; color:#9ca3af;">📋</div>`;
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span style="display:none; font-size:20px;">📋</span>`;
         } else {
-          imgTd.innerHTML = `<div style="width:40px; height:40px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:4px; color:#9ca3af;">📋</div>`;
+          imgTd.innerHTML = `<span style="font-size:20px;">📋</span>`;
         }
         
         tr.appendChild(imgTd);
         tr.innerHTML += `<td><strong>${tool.name}</strong></td>`;
-        tr.innerHTML += `<td><span style="color: ${toolStock[tool.name] > 0 ? '#48bb78' : '#e53e3e'}; font-weight: bold;">${toolStock[tool.name]}</span></td>`;
+        
+        const stockClass = toolStock[tool.name] > 0 ? 'stock-ok' : 'stock-low';
+        tr.innerHTML += `<td><span class="${stockClass}">${toolStock[tool.name]}</span></td>`;
         
         // ボタン
         const actionTd = document.createElement('td');
@@ -447,8 +516,8 @@
       
       let classes = [...classSet].sort();
       if (classes.length === 0) {
-        document.getElementById('statusDiv').innerHTML = '<p style="text-align:center; color:#666;">現在貸し出し中の工具はありません</p>';
-        debugLog('貸出状況: 現在貸出中の工具なし', 'info');
+        document.getElementById('statusDiv').innerHTML = '<p class="no-data">現在貸し出し中の工具はありません</p>';
+        debugLog('貸出状況: 現在貸出中の工具なし');
         return;
       }
       
@@ -467,7 +536,8 @@
           if (count > 0) hasRow = true;
         }
         
-        rowHtml += `<td><span style="color: ${toolStock[tool.name] > 0 ? '#48bb78' : '#e53e3e'}; font-weight: bold;">${toolStock[tool.name]}</span></td>`;
+        const stockClass = toolStock[tool.name] > 0 ? 'stock-ok' : 'stock-low';
+        rowHtml += `<td><span class="${stockClass}">${toolStock[tool.name]}</span></td>`;
         
         if (hasRow) {
           html += `<tr>${rowHtml}</tr>`;
@@ -478,7 +548,7 @@
       html += '</tbody></table>';
       document.getElementById('statusDiv').innerHTML = html;
       
-      debugLog(`貸出状況テーブル描画完了: ${displayCount}個の工具が貸出中`, 'info');
+      debugLog(`貸出状況テーブル描画完了: ${displayCount}個の工具が貸出中`);
     }
 
     // 履歴テーブル描画
@@ -487,7 +557,7 @@
       tbody.innerHTML = "";
       
       if (history.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color: #666; font-style: italic;">履歴はありません</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">履歴はありません</td></tr>';
         return;
       }
       
@@ -496,17 +566,18 @@
       
       for (const record of sortedHistory) {
         const tr = document.createElement('tr');
+        const typeClass = record.type === '貸出' ? 'style="color: #ffc107; font-weight: bold;"' : 'style="color: #28a745; font-weight: bold;"';
         tr.innerHTML = `
           <td>${record.date}</td>
           <td><strong>${record.class}</strong></td>
           <td>${record.tool}</td>
-          <td><span style="color: ${record.type === '貸出' ? '#ed8936' : '#48bb78'}; font-weight: bold;">${record.type}</span></td>
+          <td><span ${typeClass}>${record.type}</span></td>
           <td>${record.num}</td>
         `;
         tbody.appendChild(tr);
       }
       
-      debugLog(`履歴テーブル描画完了: ${history.length}件の履歴`, 'info');
+      debugLog(`履歴テーブル描画完了: ${history.length}件の履歴`);
     }
 
     // 操作モーダル
@@ -517,14 +588,14 @@
         return;
       }
       
-      debugLog(`操作モーダル開始: ${toolName} - ${type}`, 'info');
+      debugLog(`操作モーダル開始: ${toolName} - ${type}`);
       
       const maxNum = type === '貸出' ? toolStock[toolName] : 
         Math.max(...Object.values(borrowStatus[toolName] || {}), 0);
       
       if (maxNum <= 0) {
         const message = type === '貸出' ? '在庫がありません' : '貸出中の工具がありません';
-        showNotification(message, 'warning');
+        alert(message);
         debugLog(`操作不可: ${message} (${toolName})`, 'warning');
         return;
       }
@@ -558,12 +629,12 @@
 
     function closeModal() {
       document.getElementById('modal').style.display = "none";
-      debugLog('操作モーダルを閉じました', 'info');
+      debugLog('操作モーダルを閉じました');
     }
 
     // 貸出・返却処理
     function doBorrowReturn(toolName, cls, type, num) {
-      debugLog(`${type}処理開始: ${toolName} - ${cls} - ${num}本`, 'info');
+      debugLog(`${type}処理開始: ${toolName} - ${cls} - ${num}本`);
       
       if (!borrowStatus[toolName]) borrowStatus[toolName] = {};
       if (!borrowStatus[toolName][cls]) borrowStatus[toolName][cls] = 0;
@@ -571,7 +642,7 @@
       if (type === "貸出") {
         if (num > toolStock[toolName]) {
           const message = "在庫が足りません";
-          showNotification(message, 'error');
+          alert(message);
           debugLog(`貸出失敗: ${message} (要求: ${num}, 在庫: ${toolStock[toolName]})`, 'error');
           return;
         }
@@ -581,7 +652,7 @@
       } else {
         if (num > borrowStatus[toolName][cls]) {
           const message = "返却数が借りている数を超えています";
-          showNotification(message, 'error');
+          alert(message);
           debugLog(`返却失敗: ${message} (要求: ${num}, 借用中: ${borrowStatus[toolName][cls]})`, 'error');
           return;
         }
@@ -611,8 +682,6 @@
       renderStatus();
       renderHistory();
       
-      // 成功通知
-      showNotification(`${type}完了: ${toolName} ${num}本`, 'success');
       debugLog(`操作完了: 履歴に記録し、UIを更新しました`, 'success');
     }
 
@@ -636,7 +705,7 @@
           if (parsed.borrowStatus) borrowStatus = parsed.borrowStatus;
           if (parsed.toolStock) toolStock = parsed.toolStock;
           if (parsed.history) history = parsed.history;
-          if (parsed.tools && tools.length === 0) tools = parsed.tools; // CSVが未読み込みの場合のみ
+          if (parsed.tools && tools.length === 0) tools = parsed.tools;
           debugLog('ローカルストレージからデータを復元しました', 'success');
         }
       } catch (error) {
@@ -646,7 +715,7 @@
 
     // ページ読み込み時の初期化
     window.addEventListener('load', function() {
-      debugLog('システム初期化開始', 'info');
+      debugLog('システム初期化開始');
       loadFromStorage();
       if (tools.length > 0) {
         renderTools();
