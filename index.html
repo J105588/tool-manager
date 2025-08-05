@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>工具貸し出し管理システム</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background:#f5f5fa;}
+    table { border-collapse: collapse; margin-bottom:2em;}
+    th, td { border: 1px solid #aaa; padding: 0.5em 0.8em; text-align: center; }
+    th { background: #e7eefb; }
+    img.icon { width: 32px; height:32px; object-fit: contain;}
+    .tool-list, .status-table, .history-table { width: 100%; background: #fff; }
+    .tool-actions button { margin:0 0.4em 0.2em 0;}
+    .modal{
+      display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3);
+    }
+    .modal-inner{
+      background:#fff; border-radius:6px; max-width:320px; margin:10% auto; padding:1.5em 1em; box-shadow:0 4px 24px #0002;
+      text-align:left; position:relative;
+    }
+    .close-btn{
+      position:absolute;top:5px;right:10px;cursor:pointer;font-size:18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>工具貸し出し管理システム</h1>
+  
+  <div>
+    <label for="csvInput"><b>工具マスタCSVファイルを選択：</b></label>
+    <input type="file" id="csvInput" accept=".csv">
+  </div>
+  <br>
+
+  <h3>工具一覧</h3>
+  <table class="tool-list" id="toolTable">
+    <thead>
+      <tr>
+        <th>画像</th>
+        <th>工具名</th>
+        <th>在庫</th>
+        <th>貸出/返却</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 工具リスト自動挿入 -->
+    </tbody>
+  </table>
+
+  <h3>貸し出し状況一覧</h3>
+  <div id="statusDiv"></div>
+
+  <h3>貸出・返却 履歴</h3>
+  <table class="history-table" id="historyTable">
+    <thead>
+      <tr>
+        <th>日時</th>
+        <th>クラス</th>
+        <th>工具名</th>
+        <th>貸出/返却</th>
+        <th>本数</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 履歴自動挿入 -->
+    </tbody>
+  </table>
+
+
+  <!-- モーダル -->
+  <div class="modal" id="modal">
+    <div class="modal-inner">
+      <span class="close-btn" onclick="closeModal()">×</span>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // プリセットのクラス名一覧
+    const CLASS_LIST = ["1A","2A","3A","1B","2B","3B"];
+
+    // グローバル変数
+    let tools = []; // CSVからロード
+    let borrowStatus = {}; // {tool名: {class名:本数, ...}, ...}
+    let toolStock = {}; // {tool名: 在庫数}
+    let history = []; // [{datetime, class, tool, type, num},...]
+    
+    // localStorageキー
+    const STORAGE_KEY = "toolsystem-data-v1";
+
+    // CSVファイル読み込み
+    document.getElementById('csvInput').addEventListener('change', function(e){
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        parseAndLoadCSV(text);
+      };
+      reader.readAsText(file, "UTF-8");
+    });
+
+    // CSV解析用（Very Simple CSV）
+    function parseAndLoadCSV(csv){
+      const lines = csv.trim().split(/\r?\n/);
+      let header = lines[0].replace(/\s/g,'').split(',');
+      let KNAME = '工具名', KSTOCK='本数', KIMG='画像';
+      tools = [];
+      borrowStatus = {}; toolStock = {};
+      for (let i=1; i<lines.length; i++){
+        let row = lines[i].split(',');
+        let toolname = row[header.indexOf(KNAME)];
+        let stock = parseInt(row[header.indexOf(KSTOCK)]||"0",10);
+        let img = row[header.indexOf(KIMG)]||'';
+        if(toolname && stock>=0){
+          tools.push({name: toolname, stock:stock, img: img});
+          borrowStatus[toolname] = {}; //（クラス別在庫）
+          toolStock[toolname] = stock;
+        }
+      }
+      // 状態初期化&履歴（localStorage既存データ維持）
+      loadFromStorage();
+      renderTools();
+      renderStatus();
+      renderHistory();
+    }
+
+    // 工具リスト再描画
+    function renderTools(){
+      const tbody = document.querySelector('#toolTable tbody');
+      tbody.innerHTML = "";
+      for(const tool of tools){
+        const tr = document.createElement('tr');
+        // 画像
+        const imgtd = document.createElement('td');
+        if (tool.img) {
+          imgtd.innerHTML = `<img class="icon" src="tools/${tool.img}" alt="${tool.name}">`;
+        } else{
+          imgtd.innerHTML = `<div style="width:32px; height:32px; background:#eee; display:inline-block;"></div>`;
+        }
+        // 名称/在庫
+        tr.appendChild(imgtd);
+        tr.innerHTML += `<td>${tool.name}</td>`;
+        tr.innerHTML += `<td id="stock-${tool.name}">${toolStock[tool.name]}</td>`;
+        // ボタン
+        const acttd = document.createElement('td');
+        acttd.className = "tool-actions";
+        let b1 = document.createElement('button');
+        b1.textContent = "貸出";
+        b1.onclick = ()=>openOperationModal(tool.name, "貸出");
+        let b2 = document.createElement('button');
+        b2.textContent = "返却";
+        b2.onclick = ()=>openOperationModal(tool.name, "返却");
+        acttd.appendChild(b1); acttd.appendChild(b2);
+        tr.appendChild(acttd);
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    // 状況テーブル＝「誰が何本借りているか」
+    function renderStatus(){
+      let classSet = new Set();
+      for(const tool of tools){
+        for(const cls in borrowStatus[tool.name]) classSet.add(cls);
+      }
+      // クラスを表示（プリセットも入れる）
+      let classes = [...new Set([...Array.from(classSet), ...CLASS_LIST])];
+      let ths = "<th>工具名</th>";
+      for(const cls of classes) ths += `<th>${cls}</th>`;
+      ths += "<th>在庫</th>";
+
+      let html = `<table class="status-table"><thead><tr>${ths}</tr></thead><tbody>`;
+      for(const tool of tools){
+        html += `<tr><td>${tool.name}</td>`;
+        for(const cls of classes){
+          let v = borrowStatus[tool.name][cls]||0;
+          html += `<td>${v>0?v:""}</td>`;
+        }
+        html += `<td id="statusstock-${tool.name}">${toolStock[tool.name]}</td></tr>`;
+      }
+      html += "</tbody></table>";
+      document.getElementById('statusDiv').innerHTML = html;
+    }
+
+    // 履歴テーブル出力
+    function renderHistory(){
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = "";
+      for(const h of history){
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td>$$e2guZGF0ZX08L3RkPjx0ZD4=$${h.class}</td><td>$$e2gudG9vbH08L3RkPjx0ZD4=$${h.type}</td><td>${h.num}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // 操作モーダル
+    function openOperationModal(toolname, type){
+      const tool = tools.find(t=>t.name===toolname);
+      if(!tool) return;
+      let html = `<h4>${tool.name} - ${type}</h4>
+        <form id="modalForm">
+          <label>クラス:
+            <select name="class" required>
+              ${CLASS_LIST.map(c=>`<option>${c}</option>`).join("")}
+            </select>
+          </label><br><br>
+          <label>本数:
+            <input type="number" name="count" min="1" max="${tool.stock}" value="1" required>
+          </label><br><br>
+          <button type="submit">${type}する</button>
+        </form>`;
+      document.getElementById('modalContent').innerHTML = html;
+      // モーダル表示
+      document.getElementById('modal').style.display = "block";
+
+      document.getElementById('modalForm').onsubmit = (e)=>{
+        e.preventDefault();
+        let cls = e.target.class.value;
+        let num = parseInt(e.target.count.value,10);
+        doBorrowReturn(toolname, cls, type, num);
+        closeModal();
+      };
+    }
+    function closeModal(){document.getElementById('modal').style.display = "none";}
+
+    // 貸出・返却ロジック
+    function doBorrowReturn(toolname, cls, type, num){
+      if(!borrowStatus[toolname]) borrowStatus[toolname] = {};
+      if(!borrowStatus[toolname][cls]) borrowStatus[toolname][cls]=0;
+      if (type==="貸出"){
+        // 貸出制限
+        if(num > toolStock[toolname]){ alert("在庫が足りません"); return;}
+        borrowStatus[toolname][cls] += num;
+        toolStock[toolname]-=num;
+      }else{
+        // 返却: クラスの借出数を減らす
+        if(num>borrowStatus[toolname][cls]){ alert("返却数が借りている数を超えています"); return;}
+        borrowStatus[toolname][cls] -= num;
+        toolStock[toolname] += num;
+      }
+      // 履歴
+      const now = new Date();
+      const dstr = now.toLocaleString();
+      history.unshift({
+        date: dstr, class:cls, tool:toolname, type:type, num:num
+      });
+      saveToStorage();
+      renderTools(); renderStatus(); renderHistory();
+    }
+
+    // localStorage保存
+    function saveToStorage(){
+      const data = {borrowStatus, toolStock, history};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    // localStorageから復元
+    function loadFromStorage(){
+      const dat = localStorage.getItem(STORAGE_KEY);
+      if(dat){
+        try{
+          const d=JSON.parse(dat);
+          if (d.borrowStatus) borrowStatus = d.borrowStatus;
+          if (d.toolStock) toolStock = d.toolStock;
+          if (d.history) history = d.history;
+        }catch{}
+      }
+    }
+
+    // ページリロード対策
+    window.addEventListener('load', function(){
+      if (localStorage.getItem(STORAGE_KEY)){
+        loadFromStorage();
+        renderTools(); renderStatus(); renderHistory();
+      }
+    });
+  </script>
+</body>
+</html>
