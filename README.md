@@ -2,7 +2,7 @@
 
 シンプルなCSVファイルとブラウザだけで動作する、スタンドアロン型の工具貸出管理システムです。サーバーやデータベースは不要で、単一のHTMLファイルで完結します。
 
-**デモサイトURL: [https://あなたのユーザー名.github.io/あなたのリポジトリ名/](https://あなたのユーザー名.github.io/あなたのリポジトリ名/)**
+**サイトURL: [https://tools.ichigak-engeki5.com](https://tools.ichigak-engeki5.com)**
 
 ## 概要
 
